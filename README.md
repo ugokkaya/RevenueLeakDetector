@@ -2,6 +2,8 @@
 
 Find checkout leaks, cart abandonment points, and the next action to recover WooCommerce conversions.
 
+![Revenue Leak Detector Dashboard](./screenshots/09b6c84e-dc0b-406b-8952-f987b537791a.png)
+
 Revenue Leak Detector is a lightweight WooCommerce plugin focused on one job: showing where shoppers drop out between add to cart, checkout, and purchase.
 
 Instead of sending you into complex reports, it highlights:
@@ -49,4 +51,3 @@ The WordPress.org distribution uses [`readme.txt`](./readme.txt) as the canonica
 
 Ugur Can Gokkaya  
 [https://ugur.me](https://ugur.me)
-

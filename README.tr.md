@@ -2,6 +2,8 @@
 
 WooCommerce mağazanızda kullanıcıların nerede kaybolduğunu görün, checkout kaçaklarını tespit edin ve dönüşümü artırmak için atmanız gereken bir sonraki adımı öğrenin.
 
+![Revenue Leak Detector Ekranı](./screenshots/09b6c84e-dc0b-406b-8952-f987b537791a.png)
+
 Revenue Leak Detector, kullanıcıların sepete eklemeden checkout’a ve satın almaya giden yolculukta hangi noktada ayrıldığını gösteren hafif bir WooCommerce eklentisidir.
 
 Karmaşık raporlarla uğraşmak yerine doğrudan şunları gösterir:
