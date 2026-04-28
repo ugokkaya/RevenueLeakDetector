@@ -1,53 +1,56 @@
 # Revenue Leak Detector
 
-Find checkout leaks, cart abandonment points, and the next action to recover WooCommerce conversions.
+English documentation: [README.en.md](./README.en.md)
 
-![Revenue Leak Detector Dashboard](./screenshots/09b6c84e-dc0b-406b-8952-f987b537791a.png)
+WooCommerce mağazanızda kullanıcıların nerede kaybolduğunu görün, checkout kaçaklarını tespit edin ve dönüşümü artırmak için atmanız gereken bir sonraki adımı öğrenin.
 
-Revenue Leak Detector is a lightweight WooCommerce plugin focused on one job: showing where shoppers drop out between add to cart, checkout, and purchase.
+![Revenue Leak Detector Ekranı](./screenshots/09b6c84e-dc0b-406b-8952-f987b537791a.png)
 
-Instead of sending you into complex reports, it highlights:
+Revenue Leak Detector, kullanıcıların sepete eklemeden checkout’a ve satın almaya giden yolculukta hangi noktada ayrıldığını gösteren hafif bir WooCommerce eklentisidir.
 
-- the biggest conversion loss
-- the top issue that needs attention
-- the next action you should take
+Karmaşık raporlarla uğraşmak yerine doğrudan şunları gösterir:
 
-## Features
+- en büyük dönüşüm kaybı
+- önce ele alınması gereken temel sorun
+- atmanız gereken bir sonraki adım
 
-- Track the core WooCommerce funnel from cart to purchase
-- Score funnel health with a simple Revenue Leak Score
-- Spot the biggest conversion loss in seconds
-- Prioritize the most urgent issue automatically
-- Get a practical next-step recommendation
-- Review 7-day conversion trends at a glance
-- Filter by date range with quick presets
+## Özellikler
 
-## Requirements
+- WooCommerce ana funnel akışını sepetten satın almaya kadar izler
+- Basit bir Revenue Leak Score ile funnel sağlığını puanlar
+- En büyük dönüşüm kaybını saniyeler içinde görünür hale getirir
+- En acil sorunu otomatik olarak önceliklendirir
+- Uygulanabilir bir sonraki adım önerisi sunar
+- Son 7 günün dönüşüm trendini hızlıca özetler
+- Hazır kısayollarla tarih aralığı filtrelemesi yapmanızı sağlar
+
+## Gereksinimler
 
 - WordPress 6.4+
 - WooCommerce
 - PHP 7.4+
 
-## Installation
+## Kurulum
 
-1. Upload the plugin to `/wp-content/plugins/revenue-leak-detector`
-2. Activate it from the WordPress Plugins screen
-3. Make sure WooCommerce is active
-4. Open `Revenue Leak Detector` from the WordPress admin menu
+1. Eklentiyi `/wp-content/plugins/revenue-leak-detector` dizinine yükleyin
+2. WordPress eklenti ekranından etkinleştirin
+3. WooCommerce’in aktif olduğundan emin olun
+4. Yönetim menüsünden `Revenue Leak Detector` ekranını açın
 
-## Included Languages
+## Dahil Olan Diller
 
-- English
-- Turkish
-- Spanish
-- German
-- Italian
+- İngilizce
+- Türkçe
+- İspanyolca
+- Almanca
+- İtalyanca
 
 ## WordPress.org
 
-The WordPress.org distribution uses [`readme.txt`](./readme.txt) as the canonical plugin directory readme.
+WordPress.org sürümünde ana readme dosyası olarak [`readme.txt`](./readme.txt) kullanılır.
 
-## Author
+## Geliştirici
 
 Ugur Can Gokkaya  
 [https://ugur.me](https://ugur.me)
+
