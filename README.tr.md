@@ -1,24 +1,24 @@
 # Revenue Leak Detector
 
-WooCommerce mağazanızda checkout kaçağını, sepet terk noktalarını ve dönüşümü geri kazanmak için atmanız gereken bir sonraki adımı görün.
+WooCommerce mağazanızda kullanıcıların nerede kaybolduğunu görün, checkout kaçaklarını tespit edin ve dönüşümü artırmak için atmanız gereken bir sonraki adımı öğrenin.
 
-Revenue Leak Detector, tek bir işe odaklanan hafif bir WooCommerce eklentisidir: kullanıcıların sepete eklemeden checkout’a ve satın almaya giderken nerede kaybolduğunu göstermek.
+Revenue Leak Detector, kullanıcıların sepete eklemeden checkout’a ve satın almaya giden yolculukta hangi noktada ayrıldığını gösteren hafif bir WooCommerce eklentisidir.
 
-Karmaşık raporlar yerine şunları öne çıkarır:
+Karmaşık raporlarla uğraşmak yerine doğrudan şunları gösterir:
 
 - en büyük dönüşüm kaybı
-- önce ele alınması gereken ana sorun
-- atmanız gereken bir sonraki aksiyon
+- önce ele alınması gereken temel sorun
+- atmanız gereken bir sonraki adım
 
 ## Özellikler
 
 - WooCommerce ana funnel akışını sepetten satın almaya kadar izler
 - Basit bir Revenue Leak Score ile funnel sağlığını puanlar
-- En büyük dönüşüm kaybını saniyeler içinde gösterir
+- En büyük dönüşüm kaybını saniyeler içinde görünür hale getirir
 - En acil sorunu otomatik olarak önceliklendirir
 - Uygulanabilir bir sonraki adım önerisi sunar
-- Son 7 günün dönüşüm trendini özetler
-- Hazır kısayollarla tarih aralığı filtreleme sağlar
+- Son 7 günün dönüşüm trendini hızlıca özetler
+- Hazır kısayollarla tarih aralığı filtrelemesi yapmanızı sağlar
 
 ## Gereksinimler
 
@@ -43,7 +43,7 @@ Karmaşık raporlar yerine şunları öne çıkarır:
 
 ## WordPress.org
 
-WordPress.org dağıtımında ana readme dosyası [`readme.txt`](./readme.txt) dosyasıdır.
+WordPress.org sürümünde ana readme dosyası olarak [`readme.txt`](./readme.txt) kullanılır.
 
 ## Geliştirici
 
