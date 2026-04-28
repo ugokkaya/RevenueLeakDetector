@@ -1,0 +1,356 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Revenue Leak Detector 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-28 00:00+0000\n"
+"PO-Revision-Date: 2026-04-28 00:00+0000\n"
+"Last-Translator: Codex\n"
+"Language-Team: Turkish\n"
+"Language: tr_TR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Domain: revenue-leak-detector\n"
+
+msgid "Revenue Leak Detector"
+msgstr "Revenue Leak Detector"
+
+msgid "Dashboard"
+msgstr "Panel"
+
+msgid "Settings"
+msgstr "Ayarlar"
+
+msgid "Track funnel leakage, spot the biggest conversion problem, and see what to fix next."
+msgstr "Funnel kaybını izleyin, en büyük dönüşüm problemini görün ve sırada neyi düzeltmeniz gerektiğini anlayın."
+
+msgid "Settings saved."
+msgstr "Ayarlar kaydedildi."
+
+msgid "Plugin Configuration"
+msgstr "Eklenti Yapilandirmasi"
+
+msgid "API Base URL"
+msgstr "API Base URL"
+
+msgid "Developer-only setting for custom backend integrations."
+msgstr "Özel backend entegrasyonları için yalnızca geliştirici ayarı."
+
+msgid "Save Settings"
+msgstr "Ayarlari Kaydet"
+
+msgid "Revenue Leak Overview"
+msgstr "Revenue Leak Özeti"
+
+msgid "See where shoppers leak out of the WooCommerce funnel, what matters most right now, and what to fix next."
+msgstr "Müşterilerin WooCommerce funnel'da nerede kaybolduğunu, şu an en kritik konunun ne olduğunu ve sırada neyi düzeltmeniz gerektiğini görün."
+
+msgid "Start Date"
+msgstr "Başlangıç Tarihi"
+
+msgid "End Date"
+msgstr "Bitiş Tarihi"
+
+msgid "Apply Filter"
+msgstr "Filtreyi Uygula"
+
+msgid "Reset"
+msgstr "Sıfırla"
+
+msgid "Today"
+msgstr "Bugün"
+
+msgid "Yesterday"
+msgstr "Dün"
+
+msgid "Last 7 Days"
+msgstr "Son 7 Gün"
+
+msgid "Last 14 Days"
+msgstr "Son 14 Gün"
+
+msgid "Last 30 Days"
+msgstr "Son 30 Gün"
+
+msgid "Revenue Leak Score"
+msgstr "Revenue Leak Skoru"
+
+msgid "Higher is healthier. Score blends abandonment, failures, and refunds."
+msgstr "Yüksek skor daha sağlıklıdır. Skor; terk, başarısızlık ve iadeleri birlikte değerlendirir."
+
+msgid "Score starts from 100 and decreases based on funnel leakage. Weights: checkout abandonment 55%, cart-to-purchase loss 25%, order failures 12%, refunds 8%. Higher is healthier."
+msgstr "Skor 100'den başlar ve funnel kaçağına göre azalır. Ağırlıklar: checkout terk %55, sepetten satın almaya kayıp %25, başarısız siparişler %12, iadeler %8. Yüksek skor daha sağlıklıdır."
+
+msgid "Biggest User Loss"
+msgstr "En Büyük Kullanıcı Kaybı"
+
+msgid "Strongest Leak in Funnel"
+msgstr "Funnel'daki En Güçlü Kaçak"
+
+msgid "%1$d users lost (%2$s)"
+msgstr "%1$d kullanıcı kaybedildi (%2$s)"
+
+msgid "Main place where shoppers stop before paying."
+msgstr "Müşterilerin ödemeden önce en çok durduğu adım."
+
+msgid "Shows the step with the highest user loss in the selected period. It compares cart-to-checkout loss and checkout-to-purchase loss."
+msgstr "Seçilen dönemde en yüksek kullanıcı kaybının olduğu adımı gösterir. Sepetten checkout'a kayıp ile checkout'tan satın almaya kaybı karşılaştırır."
+
+msgid "Cart to Purchase Rate"
+msgstr "Sepetten Satın Almaya Dönüşüm"
+
+msgid "Purchases divided by add-to-cart sessions."
+msgstr "Satın alımların sepete ekleme oturumlarına oranı."
+
+msgid "Overall funnel conversion. It compares successful purchases against add-to-cart sessions."
+msgstr "Genel funnel dönüşümünü gösterir. Başarılı satın alımları sepete ekleme oturumlarıyla karşılaştırır."
+
+msgid "Top Issue"
+msgstr "En Önemli Sorun"
+
+msgid "The highest-priority issue detected from current funnel behavior, failures, and refunds."
+msgstr "Mevcut funnel davranışı, başarısızlıklar ve iadelere göre tespit edilen en yüksek öncelikli sorundur."
+
+msgid "How this metric works"
+msgstr "Bu metrik nasil calisir"
+
+msgid "How this recommendation works"
+msgstr "Bu önerinin mantığı"
+
+msgid "This block turns the highest-priority issue into concrete next steps you can act on now."
+msgstr "Bu blok, en yüksek öncelikli sorunu hemen uygulayabileceğiniz somut sonraki adımlara çevirir."
+
+msgid "Next Action"
+msgstr "Sıradaki Aksiyon"
+
+msgid "Why now:"
+msgstr "Neden şimdi:"
+
+msgid "%d lost users"
+msgstr "%d kaybedilen kullanıcı"
+
+msgid "Estimated loss: %d users"
+msgstr "Tahmini kayıp: %d kullanıcı"
+
+msgid "High"
+msgstr "Yüksek"
+
+msgid "Medium"
+msgstr "Orta"
+
+msgid "Low"
+msgstr "Düşük"
+
+msgid "Core Funnel"
+msgstr "Ana Funnel"
+
+msgid "How to read this funnel"
+msgstr "Bu funnel nasıl okunur"
+
+msgid "Follow shoppers from add to cart to checkout and purchase. Red blocks show where users are being lost between steps."
+msgstr "Kullanıcıları sepete eklemeden checkout'a ve satın almaya kadar izleyin. Kırmızı bloklar adımlar arasında kullanıcıların nerede kaybedildiğini gösterir."
+
+msgid "Product Added to Cart"
+msgstr "Ürün Sepete Eklendi"
+
+msgid "Checkout Started"
+msgstr "Ödeme Süreci Başladı"
+
+msgid "Payment Successful"
+msgstr "Ödeme Başarılı"
+
+msgid "Add to Cart meaning"
+msgstr "Sepete Ekleme anlamı"
+
+msgid "Number of tracked add-to-cart events in the selected date range."
+msgstr "Seçilen tarih aralığında izlenen sepete ekleme event sayısı."
+
+msgid "Entry point of the tracked funnel."
+msgstr "İzlenen funnel'in giriş noktası."
+
+msgid "Cart to Checkout"
+msgstr "Sepetten Checkout'a"
+
+msgid "Cart to Checkout meaning"
+msgstr "Sepetten Checkout'a anlamı"
+
+msgid "Shows how many users moved from cart intent into checkout, and how many were lost before starting checkout."
+msgstr "Kullanıcıların sepetteki niyetten checkout'a kaç kişinin geçtiğini ve checkout başlamadan önce kaç kişinin kaybedildiğini gösterir."
+
+msgid "%d users lost"
+msgstr "%d kullanıcı kaybedildi"
+
+msgid "did not reach checkout"
+msgstr "checkout'a ulaşmadı"
+
+msgid "Only %s continued to checkout."
+msgstr "Yalnızca %s checkout'a devam etti."
+
+msgid "Checkout Started meaning"
+msgstr "Checkout Başladı anlamı"
+
+msgid "Number of tracked sessions that reached checkout."
+msgstr "Checkout'a ulaşan izlenmiş oturum sayısı."
+
+msgid "Conversion from previous: %s"
+msgstr "Önceki adımdan dönüşüm: %s"
+
+msgid "Drop-off from previous: %d"
+msgstr "Önceki adımdan kayıp: %d"
+
+msgid "Lost %d users here"
+msgstr "Burada %d kullanıcı kaybedildi"
+
+msgid "Checkout to Purchase"
+msgstr "Checkout'tan Satın Almaya"
+
+msgid "Checkout to Purchase meaning"
+msgstr "Checkout'tan Satın Almaya anlamı"
+
+msgid "Shows how many users who started checkout completed purchase, and how many dropped before payment success."
+msgstr "Checkout'a başlayan kullanıcılardan kaçının satın alımı tamamladığını ve ödeme başarısına ulaşmadan önce kaç kişinin kaybedildiğini gösterir."
+
+msgid "0 users lost"
+msgstr "0 kullanıcı kaybedildi"
+
+msgid "completed purchase"
+msgstr "satın almayı tamamladı"
+
+msgid "Healthy progression from checkout to purchase."
+msgstr "Checkout'tan satın almaya sağlıklı geçiş var."
+
+msgid "did not complete purchase"
+msgstr "satın almayı tamamlamadı"
+
+msgid "Only %s completed purchase."
+msgstr "Yalnızca %s satın alımı tamamladı."
+
+msgid "Purchase meaning"
+msgstr "Satın Alma anlamı"
+
+msgid "Number of successful purchase events captured in the selected date range."
+msgstr "Seçilen tarih aralığında yakalanan başarılı satın alma event sayısı."
+
+msgid "No drop-off detected"
+msgstr "Kayıp tespit edilmedi"
+
+msgid "What Needs Attention"
+msgstr "Dikkat Gerektirenler"
+
+msgid "How issues are prioritized"
+msgstr "Sorunlar nasıl önceliklendirilir"
+
+msgid "Issues are ranked by severity using funnel leakage, order failures, and refunds."
+msgstr "Sorunlar funnel kaçağı, başarısız siparişler ve iadelere göre şiddete göre sıralanır."
+
+msgid "Suggested action:"
+msgstr "Önerilen aksiyon:"
+
+msgid "High Checkout Abandonment"
+msgstr "Yüksek Checkout Terk Oranı"
+
+msgid "%s of users who started checkout did not complete purchase."
+msgstr "Checkout'a başlayan kullanıcıların %s kadarı satın alımı tamamlamadı."
+
+msgid "You likely lost %d ready-to-buy users after checkout started."
+msgstr "Checkout başladıktan sonra satın almaya hazır %d kullanıcıyı kaybetmiş olabilirsiniz."
+
+msgid "Review checkout flow, remove payment friction, and shorten the form."
+msgstr "Checkout akışını gözden geçirin, ödeme sürtünmesini azaltın ve formu kısaltın."
+
+msgid "Weak Cart to Checkout Progression"
+msgstr "Sepetten Checkout'a Geçiş Zayıf"
+
+msgid "Only %s of add-to-cart sessions moved into checkout."
+msgstr "Sepete ekleme oturumlarının yalnızca %s kadarı checkout'a geçti."
+
+msgid "%d shoppers added products but never reached checkout."
+msgstr "%d kullanıcı ürün ekledi ama checkout'a hiç ulaşmadı."
+
+msgid "Strengthen the cart CTA and remove distractions before checkout."
+msgstr "Sepet CTA'sini güçlendirin ve checkout öncesi dikkat dağıtıcıları kaldırın."
+
+msgid "Order Failures Need Attention"
+msgstr "Başarısız Siparişler Dikkat Gerektiriyor"
+
+msgid "%d orders failed during the selected period."
+msgstr "Seçilen dönemde %d sipariş başarısız oldu."
+
+msgid "Customers reached payment but revenue was not captured."
+msgstr "Müşteriler ödemeye kadar geldi ancak gelir tahsil edilemedi."
+
+msgid "Audit gateway errors now and resolve the top failure reasons."
+msgstr "Ödeme geçidi hatalarını hemen inceleyin ve en yaygın başarısızlık nedenlerini çözümleyin."
+
+msgid "Refund Rate Is Elevated"
+msgstr "İade Oranı Yüksek"
+
+msgid "Refunds equal %s of successful purchases."
+msgstr "İadeler, başarılı satın alımların %s oranına eşit."
+
+msgid "Revenue is being recovered after purchase, which weakens net conversion."
+msgstr "Gelir satın alım sonrasında geri çıkıyor; bu da net dönüşümü zayıflatıyor."
+
+msgid "Review refund reasons and align the product promise with checkout expectations."
+msgstr "İade nedenlerini inceleyin ve ürün vaadini checkout beklentileriyle hizalayın."
+
+msgid "No Critical Funnel Leak Detected"
+msgstr "Kritik Funnel Kaybı Tespit Edilmedi"
+
+msgid "Current funnel metrics look stable for the selected date range."
+msgstr "Seçilen tarih aralığında funnel metrikleri stabil görünüyor."
+
+msgid "No major revenue leak signal stands out right now."
+msgstr "Şu anda belirgin bir büyük revenue leak sinyali görünmüyor."
+
+msgid "Keep monitoring trends and focus on improving conversion step by step."
+msgstr "Trendleri izlemeye devam edin ve dönüşümü adım adım iyileştirmeye odaklanın."
+
+msgid "Last 7 Days Trend"
+msgstr "Son 7 Gün Trendi"
+
+msgid "Last 7 day conversion: %s. Purchases are compared against add-to-cart intent."
+msgstr "Son 7 gün dönüşümü: %s. Satın almalar sepete ekleme niyetine göre karşılaştırılır."
+
+msgid "7-Day Add to Cart"
+msgstr "7 Günlük Sepete Ekleme"
+
+msgid "7-Day Purchases"
+msgstr "7 Günlük Satın Alma"
+
+msgid "7-Day Conversion"
+msgstr "7 Günlük Dönüşüm"
+
+msgid "Latest Day Conversion"
+msgstr "Son Gün Dönüşümü"
+
+msgid "Add to Cart"
+msgstr "Sepete Ekleme"
+
+msgid "Purchase"
+msgstr "Satın Alma"
+
+msgid "Trend chart"
+msgstr "Trend grafiği"
+
+msgid "Security check failed."
+msgstr "Güvenlik kontrolü başarısız."
+
+msgid "You are not allowed to perform this action."
+msgstr "Bu işlemi yapma yetkiniz yok."
+
+msgid "API base URL is not configured."
+msgstr "API base URL tanımlanmamış."
+
+msgid "Request body could not be encoded."
+msgstr "Request body encode edilemedi."
+
+msgid "API request failed."
+msgstr "API isteği başarısız oldu."
+
+msgid "API response is not valid JSON."
+msgstr "API yanıtı geçerli JSON değil."
+
+msgid "Batch request failed."
+msgstr "Batch isteği başarısız oldu."

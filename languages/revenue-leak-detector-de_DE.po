@@ -1,0 +1,356 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Revenue Leak Detector 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-28 00:00+0000\n"
+"PO-Revision-Date: 2026-04-28 00:00+0000\n"
+"Last-Translator: Codex\n"
+"Language-Team: German\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: revenue-leak-detector\n"
+
+msgid "Revenue Leak Detector"
+msgstr "Revenue Leak Detector"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Track funnel leakage, spot the biggest conversion problem, and see what to fix next."
+msgstr "Verfolge Funnel-Verluste, erkenne das größte Conversion-Problem und sieh, was du als Nächstes beheben solltest."
+
+msgid "Settings saved."
+msgstr "Einstellungen gespeichert."
+
+msgid "Plugin Configuration"
+msgstr "Plugin-Konfiguration"
+
+msgid "API Base URL"
+msgstr "API-Basis-URL"
+
+msgid "Developer-only setting for custom backend integrations."
+msgstr "Nur für Entwickler: Einstellung für benutzerdefinierte Backend-Integrationen."
+
+msgid "Save Settings"
+msgstr "Einstellungen speichern"
+
+msgid "Revenue Leak Overview"
+msgstr "Überblick über Umsatzverluste"
+
+msgid "See where shoppers leak out of the WooCommerce funnel, what matters most right now, and what to fix next."
+msgstr "Sieh, an welcher Stelle Käufer den WooCommerce-Funnel verlassen, was jetzt am wichtigsten ist und was du als Nächstes beheben solltest."
+
+msgid "Start Date"
+msgstr "Startdatum"
+
+msgid "End Date"
+msgstr "Enddatum"
+
+msgid "Apply Filter"
+msgstr "Filter anwenden"
+
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+msgid "Today"
+msgstr "Heute"
+
+msgid "Yesterday"
+msgstr "Gestern"
+
+msgid "Last 7 Days"
+msgstr "Letzte 7 Tage"
+
+msgid "Last 14 Days"
+msgstr "Letzte 14 Tage"
+
+msgid "Last 30 Days"
+msgstr "Letzte 30 Tage"
+
+msgid "Revenue Leak Score"
+msgstr "Umsatzverlust-Score"
+
+msgid "Higher is healthier. Score blends abandonment, failures, and refunds."
+msgstr "Höher ist besser. Der Score kombiniert Abbrüche, Fehlversuche und Rückerstattungen."
+
+msgid "Score starts from 100 and decreases based on funnel leakage. Weights: checkout abandonment 55%, cart-to-purchase loss 25%, order failures 12%, refunds 8%. Higher is healthier."
+msgstr "Der Score startet bei 100 und sinkt je nach Funnel-Verlust. Gewichtung: Checkout-Abbruch 55%, Verlust von Warenkorb zu Kauf 25%, Bestellfehler 12%, Rückerstattungen 8%. Höher ist besser."
+
+msgid "Biggest User Loss"
+msgstr "Größter Nutzerverlust"
+
+msgid "Strongest Leak in Funnel"
+msgstr "Stärkster Verlust im Funnel"
+
+msgid "%1$d users lost (%2$s)"
+msgstr "%1$d Nutzer verloren (%2$s)"
+
+msgid "Main place where shoppers stop before paying."
+msgstr "Der wichtigste Punkt, an dem Käufer vor dem Bezahlen abbrechen."
+
+msgid "Shows the step with the highest user loss in the selected period. It compares cart-to-checkout loss and checkout-to-purchase loss."
+msgstr "Zeigt den Schritt mit dem höchsten Nutzerverlust im ausgewählten Zeitraum. Verglichen werden Verluste von Warenkorb zu Checkout und von Checkout zu Kauf."
+
+msgid "Cart to Purchase Rate"
+msgstr "Conversion von Warenkorb zu Kauf"
+
+msgid "Purchases divided by add-to-cart sessions."
+msgstr "Käufe geteilt durch Sitzungen mit Hinzufügen zum Warenkorb."
+
+msgid "Overall funnel conversion. It compares successful purchases against add-to-cart sessions."
+msgstr "Gesamt-Conversion des Funnels. Verglichen werden erfolgreiche Käufe mit Sitzungen, in denen Produkte in den Warenkorb gelegt wurden."
+
+msgid "Top Issue"
+msgstr "Wichtigstes Problem"
+
+msgid "The highest-priority issue detected from current funnel behavior, failures, and refunds."
+msgstr "Das Problem mit der höchsten Priorität, erkannt anhand des aktuellen Funnel-Verhaltens, von Fehlversuchen und Rückerstattungen."
+
+msgid "How this metric works"
+msgstr "So funktioniert diese Kennzahl"
+
+msgid "How this recommendation works"
+msgstr "So funktioniert diese Empfehlung"
+
+msgid "This block turns the highest-priority issue into concrete next steps you can act on now."
+msgstr "Dieser Block verwandelt das wichtigste Problem in konkrete nächste Schritte, die du sofort umsetzen kannst."
+
+msgid "Next Action"
+msgstr "Nächste Aktion"
+
+msgid "Why now:"
+msgstr "Warum jetzt:"
+
+msgid "%d lost users"
+msgstr "%d verlorene Nutzer"
+
+msgid "Estimated loss: %d users"
+msgstr "Geschätzter Verlust: %d Nutzer"
+
+msgid "High"
+msgstr "Hoch"
+
+msgid "Medium"
+msgstr "Mittel"
+
+msgid "Low"
+msgstr "Niedrig"
+
+msgid "Core Funnel"
+msgstr "Kern-Funnel"
+
+msgid "How to read this funnel"
+msgstr "So liest du diesen Funnel"
+
+msgid "Follow shoppers from add to cart to checkout and purchase. Red blocks show where users are being lost between steps."
+msgstr "Verfolge Käufer vom Hinzufügen zum Warenkorb bis zu Checkout und Kauf. Rote Blöcke zeigen, wo Nutzer zwischen den Schritten verloren gehen."
+
+msgid "Product Added to Cart"
+msgstr "Produkt zum Warenkorb hinzugefügt"
+
+msgid "Checkout Started"
+msgstr "Checkout gestartet"
+
+msgid "Payment Successful"
+msgstr "Zahlung erfolgreich"
+
+msgid "Add to Cart meaning"
+msgstr "Bedeutung von 'Zum Warenkorb hinzufügen'"
+
+msgid "Number of tracked add-to-cart events in the selected date range."
+msgstr "Anzahl der erfassten 'Zum Warenkorb hinzufügen'-Ereignisse im ausgewählten Zeitraum."
+
+msgid "Entry point of the tracked funnel."
+msgstr "Einstiegspunkt des verfolgten Funnels."
+
+msgid "Cart to Checkout"
+msgstr "Warenkorb zu Checkout"
+
+msgid "Cart to Checkout meaning"
+msgstr "Bedeutung von Warenkorb zu Checkout"
+
+msgid "Shows how many users moved from cart intent into checkout, and how many were lost before starting checkout."
+msgstr "Zeigt, wie viele Nutzer vom Warenkorb in den Checkout gewechselt sind und wie viele vor dem Start des Checkouts verloren gingen."
+
+msgid "%d users lost"
+msgstr "%d Nutzer verloren"
+
+msgid "did not reach checkout"
+msgstr "haben den Checkout nicht erreicht"
+
+msgid "Only %s continued to checkout."
+msgstr "Nur %s haben mit dem Checkout fortgefahren."
+
+msgid "Checkout Started meaning"
+msgstr "Bedeutung von Checkout gestartet"
+
+msgid "Number of tracked sessions that reached checkout."
+msgstr "Anzahl der erfassten Sitzungen, die den Checkout erreicht haben."
+
+msgid "Conversion from previous: %s"
+msgstr "Conversion vom vorherigen Schritt: %s"
+
+msgid "Drop-off from previous: %d"
+msgstr "Abbruch vom vorherigen Schritt: %d"
+
+msgid "Lost %d users here"
+msgstr "Hier gingen %d Nutzer verloren"
+
+msgid "Checkout to Purchase"
+msgstr "Checkout zu Kauf"
+
+msgid "Checkout to Purchase meaning"
+msgstr "Bedeutung von Checkout zu Kauf"
+
+msgid "Shows how many users who started checkout completed purchase, and how many dropped before payment success."
+msgstr "Zeigt, wie viele Nutzer nach dem Start des Checkouts den Kauf abgeschlossen haben und wie viele vor einer erfolgreichen Zahlung abgesprungen sind."
+
+msgid "0 users lost"
+msgstr "0 Nutzer verloren"
+
+msgid "completed purchase"
+msgstr "haben den Kauf abgeschlossen"
+
+msgid "Healthy progression from checkout to purchase."
+msgstr "Gesunder Übergang von Checkout zu Kauf."
+
+msgid "did not complete purchase"
+msgstr "haben den Kauf nicht abgeschlossen"
+
+msgid "Only %s completed purchase."
+msgstr "Nur %s haben den Kauf abgeschlossen."
+
+msgid "Purchase meaning"
+msgstr "Bedeutung von Kauf"
+
+msgid "Number of successful purchase events captured in the selected date range."
+msgstr "Anzahl der erfolgreichen Kaufereignisse im ausgewählten Zeitraum."
+
+msgid "No drop-off detected"
+msgstr "Kein Abbruch erkannt"
+
+msgid "What Needs Attention"
+msgstr "Was Aufmerksamkeit braucht"
+
+msgid "How issues are prioritized"
+msgstr "So werden Probleme priorisiert"
+
+msgid "Issues are ranked by severity using funnel leakage, order failures, and refunds."
+msgstr "Probleme werden nach Schweregrad anhand von Funnel-Verlusten, Bestellfehlern und Rückerstattungen eingestuft."
+
+msgid "Suggested action:"
+msgstr "Empfohlene Aktion:"
+
+msgid "High Checkout Abandonment"
+msgstr "Hoher Checkout-Abbruch"
+
+msgid "%s of users who started checkout did not complete purchase."
+msgstr "%s der Nutzer, die den Checkout gestartet haben, haben den Kauf nicht abgeschlossen."
+
+msgid "You likely lost %d ready-to-buy users after checkout started."
+msgstr "Du hast wahrscheinlich %d kaufbereite Nutzer nach dem Start des Checkouts verloren."
+
+msgid "Review checkout flow, remove payment friction, and shorten the form."
+msgstr "Prüfe den Checkout-Ablauf, reduziere Zahlungsreibung und verkürze das Formular."
+
+msgid "Weak Cart to Checkout Progression"
+msgstr "Schwacher Übergang von Warenkorb zu Checkout"
+
+msgid "Only %s of add-to-cart sessions moved into checkout."
+msgstr "Nur %s der Sitzungen mit 'Zum Warenkorb hinzufügen' gingen in den Checkout über."
+
+msgid "%d shoppers added products but never reached checkout."
+msgstr "%d Käufer haben Produkte hinzugefügt, den Checkout aber nie erreicht."
+
+msgid "Strengthen the cart CTA and remove distractions before checkout."
+msgstr "Stärke den CTA im Warenkorb und entferne Ablenkungen vor dem Checkout."
+
+msgid "Order Failures Need Attention"
+msgstr "Bestellfehler benötigen Aufmerksamkeit"
+
+msgid "%d orders failed during the selected period."
+msgstr "%d Bestellungen sind im ausgewählten Zeitraum fehlgeschlagen."
+
+msgid "Customers reached payment but revenue was not captured."
+msgstr "Kunden erreichten den Zahlungsschritt, aber der Umsatz wurde nicht erfasst."
+
+msgid "Audit gateway errors now and resolve the top failure reasons."
+msgstr "Prüfe jetzt Gateway-Fehler und behebe die häufigsten Ursachen."
+
+msgid "Refund Rate Is Elevated"
+msgstr "Rückerstattungsrate ist erhöht"
+
+msgid "Refunds equal %s of successful purchases."
+msgstr "Rückerstattungen entsprechen %s der erfolgreichen Käufe."
+
+msgid "Revenue is being recovered after purchase, which weakens net conversion."
+msgstr "Umsatz geht nach dem Kauf wieder verloren, was die Netto-Conversion schwächt."
+
+msgid "Review refund reasons and align the product promise with checkout expectations."
+msgstr "Prüfe Rückerstattungsgründe und gleiche das Produktversprechen mit den Erwartungen im Checkout ab."
+
+msgid "No Critical Funnel Leak Detected"
+msgstr "Kein kritischer Funnel-Verlust erkannt"
+
+msgid "Current funnel metrics look stable for the selected date range."
+msgstr "Die aktuellen Funnel-Kennzahlen sehen für den ausgewählten Zeitraum stabil aus."
+
+msgid "No major revenue leak signal stands out right now."
+msgstr "Aktuell sticht kein größeres Signal für Umsatzverlust hervor."
+
+msgid "Keep monitoring trends and focus on improving conversion step by step."
+msgstr "Beobachte die Trends weiter und konzentriere dich darauf, die Conversion Schritt für Schritt zu verbessern."
+
+msgid "Last 7 Days Trend"
+msgstr "Trend der letzten 7 Tage"
+
+msgid "Last 7 day conversion: %s. Purchases are compared against add-to-cart intent."
+msgstr "Conversion der letzten 7 Tage: %s. Käufe werden mit der Absicht des Hinzufügens zum Warenkorb verglichen."
+
+msgid "7-Day Add to Cart"
+msgstr "Zum Warenkorb hinzufügen in 7 Tagen"
+
+msgid "7-Day Purchases"
+msgstr "Käufe in 7 Tagen"
+
+msgid "7-Day Conversion"
+msgstr "Conversion in 7 Tagen"
+
+msgid "Latest Day Conversion"
+msgstr "Conversion des letzten Tages"
+
+msgid "Add to Cart"
+msgstr "Zum Warenkorb hinzufügen"
+
+msgid "Purchase"
+msgstr "Kauf"
+
+msgid "Trend chart"
+msgstr "Trenddiagramm"
+
+msgid "Security check failed."
+msgstr "Sicherheitsprüfung fehlgeschlagen."
+
+msgid "You are not allowed to perform this action."
+msgstr "Du bist nicht berechtigt, diese Aktion auszuführen."
+
+msgid "API base URL is not configured."
+msgstr "Die API-Basis-URL ist nicht konfiguriert."
+
+msgid "Request body could not be encoded."
+msgstr "Der Request-Body konnte nicht kodiert werden."
+
+msgid "API request failed."
+msgstr "API-Anfrage fehlgeschlagen."
+
+msgid "API response is not valid JSON."
+msgstr "Die API-Antwort ist kein gültiges JSON."
+
+msgid "Batch request failed."
+msgstr "Batch-Anfrage fehlgeschlagen."
