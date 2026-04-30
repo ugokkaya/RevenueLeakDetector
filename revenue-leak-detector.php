@@ -110,6 +110,268 @@ function revenue_leak_detector_insert_queue_event($event_type, $payload, $status
 }
 
 /**
+ * Returns a sanitized server value.
+ *
+ * @param string $key Server array key.
+ *
+ * @return string
+ */
+function revenue_leak_detector_get_server_value($key)
+{
+    if (! isset($_SERVER[$key])) {
+        return '';
+    }
+
+    $value = wp_unslash($_SERVER[$key]);
+
+    if (is_array($value)) {
+        return '';
+    }
+
+    return sanitize_text_field((string) $value);
+}
+
+/**
+ * Returns the best available client IP address for request diagnostics.
+ *
+ * @return string
+ */
+function revenue_leak_detector_get_client_ip_address()
+{
+    $forwarded_for = revenue_leak_detector_get_server_value('HTTP_X_FORWARDED_FOR');
+
+    if ($forwarded_for !== '') {
+        $forwarded_parts = array_map('trim', explode(',', $forwarded_for));
+
+        foreach ($forwarded_parts as $ip_address) {
+            if (filter_var($ip_address, FILTER_VALIDATE_IP)) {
+                return $ip_address;
+            }
+        }
+    }
+
+    $real_ip = revenue_leak_detector_get_server_value('HTTP_X_REAL_IP');
+
+    if ($real_ip !== '' && filter_var($real_ip, FILTER_VALIDATE_IP)) {
+        return $real_ip;
+    }
+
+    $remote_addr = revenue_leak_detector_get_server_value('REMOTE_ADDR');
+
+    return filter_var($remote_addr, FILTER_VALIDATE_IP) ? $remote_addr : '';
+}
+
+/**
+ * Returns whether the current user agent is a known crawler or automation client.
+ *
+ * @param string $user_agent User agent header.
+ *
+ * @return bool
+ */
+function revenue_leak_detector_is_known_bot_user_agent($user_agent)
+{
+    $user_agent = strtolower((string) $user_agent);
+
+    if ($user_agent === '') {
+        return false;
+    }
+
+    return (bool) preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegrambot|twitterbot|linkedinbot|pinterest|semrush|ahrefs|mj12bot|dotbot|petalbot|yandex|baiduspider|duckduckbot|headless|phantomjs|python-requests|curl|wget|httpclient|go-http-client/i', $user_agent);
+}
+
+/**
+ * Returns whether the request is a direct WooCommerce add-to-cart endpoint hit.
+ *
+ * @return bool
+ */
+function revenue_leak_detector_is_direct_add_to_cart_request()
+{
+    $add_to_cart = isset($_REQUEST['add-to-cart']) ? wp_unslash($_REQUEST['add-to-cart']) : '';
+
+    if (! is_array($add_to_cart) && absint($add_to_cart) > 0) {
+        return true;
+    }
+
+    $wc_ajax = isset($_REQUEST['wc-ajax']) ? wp_unslash($_REQUEST['wc-ajax']) : '';
+
+    if (is_array($wc_ajax)) {
+        return false;
+    }
+
+    $wc_ajax = sanitize_key($wc_ajax);
+
+    return $wc_ajax === 'add_to_cart';
+}
+
+/**
+ * Returns request context fields stored with event payloads.
+ *
+ * @return array<string, mixed>
+ */
+function revenue_leak_detector_get_request_context()
+{
+    $user_agent = revenue_leak_detector_get_server_value('HTTP_USER_AGENT');
+    $request_uri = revenue_leak_detector_get_server_value('REQUEST_URI');
+    $referrer = revenue_leak_detector_get_server_value('HTTP_REFERER');
+    $request_method = revenue_leak_detector_get_server_value('REQUEST_METHOD');
+    $bot_reasons = array();
+
+    if (revenue_leak_detector_is_known_bot_user_agent($user_agent)) {
+        $bot_reasons[] = 'known_bot_user_agent';
+    }
+
+    if ($user_agent === '') {
+        $bot_reasons[] = 'missing_user_agent';
+    }
+
+    return array(
+        'ip_address'                    => revenue_leak_detector_get_client_ip_address(),
+        'user_agent'                    => $user_agent,
+        'referrer'                      => $referrer,
+        'request_uri'                   => $request_uri,
+        'request_method'                => $request_method,
+        'is_ajax'                       => function_exists('wp_doing_ajax') ? wp_doing_ajax() : (defined('DOING_AJAX') && DOING_AJAX),
+        'is_direct_add_to_cart_request' => revenue_leak_detector_is_direct_add_to_cart_request(),
+        'is_bot'                        => $bot_reasons !== array(),
+        'bot_reasons'                   => $bot_reasons,
+    );
+}
+
+/**
+ * Adds request diagnostics to an event payload.
+ *
+ * @param array<string, mixed> $payload Event payload.
+ *
+ * @return array<string, mixed>
+ */
+function revenue_leak_detector_add_request_context_to_payload(array $payload)
+{
+    return array_merge($payload, revenue_leak_detector_get_request_context());
+}
+
+/**
+ * Returns a stable visitor key for short-window rate limiting.
+ *
+ * @return string
+ */
+function revenue_leak_detector_get_rate_limit_visitor_key()
+{
+    $session_id = function_exists('WC') && WC()->session ? WC()->session->get_customer_id() : '';
+
+    if (is_string($session_id) && $session_id !== '') {
+        return 'session:' . $session_id;
+    }
+
+    $ip_address = revenue_leak_detector_get_client_ip_address();
+    $user_agent = revenue_leak_detector_get_server_value('HTTP_USER_AGENT');
+
+    return 'ipua:' . md5($ip_address . '|' . $user_agent);
+}
+
+/**
+ * Increments a short-window rate-limit bucket.
+ *
+ * @param string $bucket_key Bucket identifier.
+ * @param int    $limit      Maximum allowed attempts in the window.
+ *
+ * @return bool
+ */
+function revenue_leak_detector_rate_limit_bucket_exceeded($bucket_key, $limit)
+{
+    $transient_key = 'rld_atc_rl_' . md5($bucket_key);
+    $attempts = (int) get_transient($transient_key);
+
+    if ($attempts >= $limit) {
+        return true;
+    }
+
+    set_transient($transient_key, $attempts + 1, MINUTE_IN_SECONDS);
+
+    return false;
+}
+
+/**
+ * Returns true when the current request exceeds the add-to-cart rate limit.
+ *
+ * @param int $product_id Product ID.
+ *
+ * @return bool
+ */
+function revenue_leak_detector_is_add_to_cart_rate_limited($product_id)
+{
+    $product_id = absint($product_id);
+    $visitor_key = revenue_leak_detector_get_rate_limit_visitor_key();
+    $ip_address = revenue_leak_detector_get_client_ip_address();
+    $limits = array(
+        array('visitor:' . $visitor_key . '|product:' . $product_id, 5),
+        array('ip:' . $ip_address . '|product:' . $product_id, 20),
+        array('ip:' . $ip_address . '|all', 60),
+    );
+
+    foreach ($limits as $limit) {
+        if ($ip_address === '' && strpos($limit[0], 'ip:') === 0) {
+            continue;
+        }
+
+        if (revenue_leak_detector_rate_limit_bucket_exceeded($limit[0], (int) $limit[1])) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Classifies the current add-to-cart request.
+ *
+ * @param int $product_id Product ID.
+ *
+ * @return array{status: string, reasons: array<int, string>}
+ */
+function revenue_leak_detector_classify_add_to_cart_request($product_id)
+{
+    $context = revenue_leak_detector_get_request_context();
+    $reasons = array();
+
+    if (! empty($context['is_bot'])) {
+        $reasons = array_merge($reasons, (array) $context['bot_reasons']);
+    }
+
+    if (! empty($context['is_direct_add_to_cart_request']) && empty($context['referrer'])) {
+        $reasons[] = 'direct_add_to_cart_without_referrer';
+    }
+
+    if (revenue_leak_detector_is_add_to_cart_rate_limited($product_id)) {
+        $reasons[] = 'rate_limited';
+    }
+
+    return array(
+        'status'  => $reasons === array() ? 'pending' : 'ignored',
+        'reasons' => array_values(array_unique($reasons)),
+    );
+}
+
+/**
+ * Classifies a page-level funnel request.
+ *
+ * @return array{status: string, reasons: array<int, string>}
+ */
+function revenue_leak_detector_classify_funnel_request()
+{
+    $context = revenue_leak_detector_get_request_context();
+    $reasons = array();
+
+    if (! empty($context['is_bot'])) {
+        $reasons = array_merge($reasons, (array) $context['bot_reasons']);
+    }
+
+    return array(
+        'status'  => $reasons === array() ? 'pending' : 'ignored',
+        'reasons' => array_values(array_unique($reasons)),
+    );
+}
+
+/**
  * Returns pending queue events.
  *
  * @param int $limit Maximum number of events.
@@ -237,9 +499,10 @@ function revenue_leak_detector_get_event_counts_by_type(array $filters)
         "SELECT event_type, COUNT(*) AS total
         FROM " . revenue_leak_detector_get_queue_table_name() . "
         WHERE {$range['sql']}
+        AND status <> %s
         GROUP BY event_type
         ORDER BY total DESC, event_type ASC",
-        $range['params']
+        array_merge($range['params'], array('ignored'))
     );
     $results = (array) $wpdb->get_results($query);
     $counts = array();
@@ -275,9 +538,10 @@ function revenue_leak_detector_get_queue_events_for_filters(array $filters, arra
         "SELECT id, event_type, payload_json, status, created_at
         FROM " . revenue_leak_detector_get_queue_table_name() . "
         WHERE {$range['sql']}
+        AND status <> %s
         AND event_type IN ({$placeholders})
         ORDER BY id DESC",
-        array_merge($range['params'], $event_types)
+        array_merge($range['params'], array('ignored'), $event_types)
     );
 
     return (array) $wpdb->get_results($query);
@@ -310,11 +574,13 @@ function revenue_leak_detector_get_daily_trend_data(array $filters, $days = 7)
         FROM " . revenue_leak_detector_get_queue_table_name() . "
         WHERE created_at >= %s
         AND created_at <= %s
+        AND status <> %s
         AND event_type IN (%s, %s)
         GROUP BY DATE(created_at), event_type
         ORDER BY day_key ASC",
         $start_date . ' 00:00:00',
         $end_date . ' 23:59:59',
+        'ignored',
         'add_to_cart',
         'payment_success'
     );
@@ -1076,7 +1342,7 @@ function revenue_leak_detector_build_add_to_cart_payload($product_id, $quantity)
         }
     }
 
-    return $payload;
+    return revenue_leak_detector_add_request_context_to_payload($payload);
 }
 
 /**
@@ -1097,7 +1363,7 @@ function revenue_leak_detector_build_begin_checkout_payload()
         'items'       => revenue_leak_detector_build_cart_items_payload(),
     );
 
-    return $payload;
+    return revenue_leak_detector_add_request_context_to_payload($payload);
 }
 
 /**
@@ -1107,7 +1373,7 @@ function revenue_leak_detector_build_begin_checkout_payload()
  */
 function revenue_leak_detector_build_cart_context_payload()
 {
-    return array(
+    return revenue_leak_detector_add_request_context_to_payload(array(
         'user_id'        => get_current_user_id(),
         'session_id'     => function_exists('WC') && WC()->session ? WC()->session->get_customer_id() : '',
         'occurred_at'    => current_time('mysql', true),
@@ -1115,7 +1381,7 @@ function revenue_leak_detector_build_cart_context_payload()
         'item_count'     => function_exists('WC') && WC()->cart ? (int) WC()->cart->get_cart_contents_count() : 0,
         'cart_hash'      => revenue_leak_detector_get_cart_fingerprint(),
         'currency'       => function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : get_option('woocommerce_currency', ''),
-    );
+    ));
 }
 
 /**
@@ -1165,7 +1431,7 @@ function revenue_leak_detector_build_remove_from_cart_payload($product_id, $quan
  */
 function revenue_leak_detector_build_add_shipping_info_payload($order)
 {
-    return array(
+    return revenue_leak_detector_add_request_context_to_payload(array(
         'order_id'         => (int) $order->get_id(),
         'user_id'          => (int) $order->get_user_id(),
         'occurred_at'      => current_time('mysql', true),
@@ -1176,7 +1442,7 @@ function revenue_leak_detector_build_add_shipping_info_payload($order)
         'total'            => (float) $order->get_total(),
         'item_count'       => (int) $order->get_item_count(),
         'items'            => revenue_leak_detector_build_order_items_payload($order),
-    );
+    ));
 }
 
 /**
@@ -1188,7 +1454,7 @@ function revenue_leak_detector_build_add_shipping_info_payload($order)
  */
 function revenue_leak_detector_build_add_payment_info_payload($order)
 {
-    return array(
+    return revenue_leak_detector_add_request_context_to_payload(array(
         'order_id'        => (int) $order->get_id(),
         'user_id'         => (int) $order->get_user_id(),
         'occurred_at'     => current_time('mysql', true),
@@ -1198,7 +1464,7 @@ function revenue_leak_detector_build_add_payment_info_payload($order)
         'total'           => (float) $order->get_total(),
         'item_count'      => (int) $order->get_item_count(),
         'items'           => revenue_leak_detector_build_order_items_payload($order),
-    );
+    ));
 }
 
 /**
@@ -1218,16 +1484,16 @@ function revenue_leak_detector_build_order_lifecycle_payload($order_id, $event_t
     );
 
     if (! function_exists('wc_get_order')) {
-        return $payload;
+        return revenue_leak_detector_add_request_context_to_payload($payload);
     }
 
     $order = wc_get_order($order_id);
 
     if (! $order) {
-        return $payload;
+        return revenue_leak_detector_add_request_context_to_payload($payload);
     }
 
-    return array_merge(
+    return revenue_leak_detector_add_request_context_to_payload(array_merge(
         $payload,
         array(
             'user_id'              => (int) $order->get_user_id(),
@@ -1240,7 +1506,7 @@ function revenue_leak_detector_build_order_lifecycle_payload($order_id, $event_t
             'shipping_method'      => $order->get_shipping_method(),
             'items'                => revenue_leak_detector_build_order_items_payload($order),
         )
-    );
+    ));
 }
 
 /**
@@ -1257,7 +1523,7 @@ function revenue_leak_detector_build_refund_payload($order_id, $refund_id)
     $payload['refund_id'] = absint($refund_id);
 
     if (! function_exists('wc_get_order')) {
-        return $payload;
+        return revenue_leak_detector_add_request_context_to_payload($payload);
     }
 
     $refund = wc_get_order($refund_id);
@@ -1288,13 +1554,13 @@ function revenue_leak_detector_build_payment_success_payload($order_id)
     );
 
     if (! function_exists('wc_get_order')) {
-        return $payload;
+        return revenue_leak_detector_add_request_context_to_payload($payload);
     }
 
     $order = wc_get_order($order_id);
 
     if (! $order) {
-        return $payload;
+        return revenue_leak_detector_add_request_context_to_payload($payload);
     }
 
     $payload['user_id'] = (int) $order->get_user_id();
@@ -1307,7 +1573,7 @@ function revenue_leak_detector_build_payment_success_payload($order_id)
     $payload['shipping_method'] = $order->get_shipping_method();
     $payload['items'] = revenue_leak_detector_build_order_items_payload($order);
 
-    return $payload;
+    return revenue_leak_detector_add_request_context_to_payload($payload);
 }
 
 /**
@@ -1593,9 +1859,17 @@ function revenue_leak_detector_capture_add_to_cart($cart_item_key, $product_id, 
         return;
     }
 
+    $classification = revenue_leak_detector_classify_add_to_cart_request($product_id);
+    $payload = revenue_leak_detector_build_add_to_cart_payload($product_id, $quantity);
+
+    if ($classification['reasons'] !== array()) {
+        $payload['ignored_reasons'] = $classification['reasons'];
+    }
+
     revenue_leak_detector_insert_queue_event(
         'add_to_cart',
-        revenue_leak_detector_build_add_to_cart_payload($product_id, $quantity)
+        $payload,
+        $classification['status']
     );
 }
 
@@ -1614,9 +1888,17 @@ function revenue_leak_detector_capture_view_cart()
         return;
     }
 
+    $classification = revenue_leak_detector_classify_funnel_request();
+    $payload = revenue_leak_detector_build_view_cart_payload();
+
+    if ($classification['reasons'] !== array()) {
+        $payload['ignored_reasons'] = $classification['reasons'];
+    }
+
     revenue_leak_detector_insert_queue_event(
         'view_cart',
-        revenue_leak_detector_build_view_cart_payload()
+        $payload,
+        $classification['status']
     );
 
     revenue_leak_detector_mark_view_cart_captured();
@@ -1665,10 +1947,19 @@ function revenue_leak_detector_capture_begin_checkout()
         return;
     }
 
+    $classification = revenue_leak_detector_classify_funnel_request();
+    $payload = revenue_leak_detector_build_begin_checkout_payload();
+
+    if ($classification['reasons'] !== array()) {
+        $payload['ignored_reasons'] = $classification['reasons'];
+    }
+
     revenue_leak_detector_insert_queue_event(
         'begin_checkout',
-        revenue_leak_detector_build_begin_checkout_payload()
+        $payload,
+        $classification['status']
     );
+
     revenue_leak_detector_mark_begin_checkout_captured();
 }
 
@@ -2773,6 +3064,7 @@ function revenue_leak_detector_deactivate()
 register_activation_hook(__FILE__, 'revenue_leak_detector_activate');
 register_deactivation_hook(__FILE__, 'revenue_leak_detector_deactivate');
 add_action('init', 'revenue_leak_detector_load_textdomain');
+add_action('init', 'revenue_leak_detector_schedule_cron');
 add_action('admin_menu', 'revenue_leak_detector_register_admin_menu');
 add_action('admin_post_revenue_leak_detector_save_settings', 'revenue_leak_detector_handle_save_settings');
 add_action(REVENUE_LEAK_DETECTOR_CRON_HOOK, 'revenue_leak_detector_run_scheduled_batch_send');
