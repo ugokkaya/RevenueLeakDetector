@@ -4,6 +4,8 @@
  * Plugin URI: https://ugur.me
  * Description: Find checkout leaks, cart abandonment points, and the next action to recover WooCommerce conversions.
  * Version: 1.0.0
+ * Requires at least: 6.4
+ * Requires PHP: 7.4
  * Author: Ugur Can Gokkaya
  * Author URI: https://ugur.me
  * License: GPLv2 or later
@@ -15,8 +17,6 @@
 if (! defined('ABSPATH')) {
     exit;
 }
-
-define('REVENUE_LEAK_DETECTOR_CRON_HOOK', 'revenue_leak_detector_send_pending_events');
 
 /**
  * Loads the plugin text domain.
@@ -211,8 +211,6 @@ function revenue_leak_detector_is_direct_add_to_cart_request()
 function revenue_leak_detector_get_request_context()
 {
     $user_agent = revenue_leak_detector_get_server_value('HTTP_USER_AGENT');
-    $request_uri = revenue_leak_detector_get_server_value('REQUEST_URI');
-    $referrer = revenue_leak_detector_get_server_value('HTTP_REFERER');
     $request_method = revenue_leak_detector_get_server_value('REQUEST_METHOD');
     $bot_reasons = array();
 
@@ -225,10 +223,6 @@ function revenue_leak_detector_get_request_context()
     }
 
     return array(
-        'ip_address'                    => revenue_leak_detector_get_client_ip_address(),
-        'user_agent'                    => $user_agent,
-        'referrer'                      => $referrer,
-        'request_uri'                   => $request_uri,
         'request_method'                => $request_method,
         'is_ajax'                       => function_exists('wp_doing_ajax') ? wp_doing_ajax() : (defined('DOING_AJAX') && DOING_AJAX),
         'is_direct_add_to_cart_request' => revenue_leak_detector_is_direct_add_to_cart_request(),
@@ -331,13 +325,14 @@ function revenue_leak_detector_is_add_to_cart_rate_limited($product_id)
 function revenue_leak_detector_classify_add_to_cart_request($product_id)
 {
     $context = revenue_leak_detector_get_request_context();
+    $referrer = revenue_leak_detector_get_server_value('HTTP_REFERER');
     $reasons = array();
 
     if (! empty($context['is_bot'])) {
         $reasons = array_merge($reasons, (array) $context['bot_reasons']);
     }
 
-    if (! empty($context['is_direct_add_to_cart_request']) && empty($context['referrer'])) {
+    if (! empty($context['is_direct_add_to_cart_request']) && $referrer === '') {
         $reasons[] = 'direct_add_to_cart_without_referrer';
     }
 
@@ -428,54 +423,6 @@ function revenue_leak_detector_insert_classified_queue_event($event_type, array 
         revenue_leak_detector_apply_event_classification_to_payload($payload, $classification),
         isset($classification['status']) ? (string) $classification['status'] : 'pending'
     );
-}
-
-/**
- * Returns pending queue events.
- *
- * @param int $limit Maximum number of events.
- *
- * @return array<int, object>
- */
-function revenue_leak_detector_get_pending_queue_events($limit = 20)
-{
-    global $wpdb;
-
-    $limit = max(1, (int) $limit);
-    $table_name = revenue_leak_detector_get_queue_table_name();
-    $query = $wpdb->prepare(
-        "SELECT id, event_type, payload_json, status, created_at
-        FROM {$table_name}
-        WHERE status = %s
-        ORDER BY id ASC
-        LIMIT %d",
-        'pending',
-        $limit
-    );
-
-    return (array) $wpdb->get_results($query);
-}
-
-/**
- * Returns queue events for a specific status.
- *
- * @param string $status Queue status.
- *
- * @return array<int, object>
- */
-function revenue_leak_detector_get_queue_events_by_status($status)
-{
-    global $wpdb;
-
-    $query = $wpdb->prepare(
-        "SELECT id, event_type, payload_json, status, created_at
-        FROM " . revenue_leak_detector_get_queue_table_name() . "
-        WHERE status = %s
-        ORDER BY id ASC",
-        sanitize_text_field($status)
-    );
-
-    return (array) $wpdb->get_results($query);
 }
 
 /**
@@ -870,16 +817,6 @@ function revenue_leak_detector_extract_items_from_payload(array $payload, $event
 }
 
 /**
- * Returns whether developer-facing settings should be visible.
- *
- * @return bool
- */
-function revenue_leak_detector_should_show_developer_settings()
-{
-    return defined('WP_DEBUG') && WP_DEBUG;
-}
-
-/**
  * Builds a prioritized list of insight issues from local funnel metrics.
  *
  * @param array<string, mixed> $summary Summary metrics.
@@ -1068,107 +1005,6 @@ function revenue_leak_detector_get_local_dashboard_data(array $filters)
 }
 
 /**
- * Reserves pending queue events for a single batch run.
- *
- * @param int $limit Maximum number of events.
- *
- * @return array{status: string, events: array<int, object>}
- */
-function revenue_leak_detector_reserve_pending_queue_events($limit = 20)
-{
-    global $wpdb;
-
-    $events = revenue_leak_detector_get_pending_queue_events($limit);
-
-    if ($events === array()) {
-        return array(
-            'status' => '',
-            'events' => array(),
-        );
-    }
-
-    $event_ids = array_map(
-        static function ($event) {
-            return (int) $event->id;
-        },
-        $events
-    );
-    $reservation_status = 'processing_' . wp_generate_password(12, false, false);
-    $placeholders = implode(', ', array_fill(0, count($event_ids), '%d'));
-    $update_query = $wpdb->prepare(
-        "UPDATE " . revenue_leak_detector_get_queue_table_name() . "
-        SET status = %s
-        WHERE status = %s
-        AND id IN ({$placeholders})",
-        array_merge(array($reservation_status, 'pending'), $event_ids)
-    );
-
-    $wpdb->query($update_query);
-
-    return array(
-        'status' => $reservation_status,
-        'events' => revenue_leak_detector_get_queue_events_by_status($reservation_status),
-    );
-}
-
-/**
- * Updates queue events from one status to another.
- *
- * @param array<int, int> $event_ids Queue event IDs.
- * @param string          $from_status Current status.
- * @param string          $to_status Target status.
- *
- * @return int|false
- */
-function revenue_leak_detector_update_queue_event_status(array $event_ids, $from_status, $to_status)
-{
-    global $wpdb;
-
-    $event_ids = array_values(array_filter(array_map('absint', $event_ids)));
-
-    if ($event_ids === array()) {
-        return 0;
-    }
-
-    $placeholders = implode(', ', array_fill(0, count($event_ids), '%d'));
-    $query = $wpdb->prepare(
-        "UPDATE " . revenue_leak_detector_get_queue_table_name() . "
-        SET status = %s
-        WHERE status = %s
-        AND id IN ({$placeholders})",
-        array_merge(array(sanitize_text_field($to_status), sanitize_text_field($from_status)), $event_ids)
-    );
-
-    return $wpdb->query($query);
-}
-
-/**
- * Marks queue events as sent.
- *
- * @param array<int, int> $event_ids Queue event IDs.
- * @param string          $from_status Current status.
- *
- * @return int|false
- */
-function revenue_leak_detector_mark_queue_events_sent(array $event_ids, $from_status = 'pending')
-{
-    return revenue_leak_detector_update_queue_event_status($event_ids, $from_status, 'sent');
-}
-
-/**
- * Returns reserved queue events back to pending.
- *
- * @param array<int, int> $event_ids Queue event IDs.
- * @param string          $from_status Current status.
- *
- * @return int|false
- */
-function revenue_leak_detector_release_queue_events(array $event_ids, $from_status)
-{
-    return revenue_leak_detector_update_queue_event_status($event_ids, $from_status, 'pending');
-}
-
-/**
  * Returns the current cart fingerprint.
  *
  * @return string
@@ -1338,34 +1174,6 @@ function revenue_leak_detector_reset_begin_checkout_marker()
 }
 
 /**
- * Validates a nonce for admin-post actions.
- *
- * @param string $action Nonce action.
- *
- * @return void
- */
-function revenue_leak_detector_verify_admin_nonce($action)
-{
-    $nonce = isset($_REQUEST['_wpnonce']) ? sanitize_text_field(wp_unslash($_REQUEST['_wpnonce'])) : '';
-
-    if (! wp_verify_nonce($nonce, $action)) {
-        wp_die(esc_html__('Security check failed.', 'revenue-leak-detector'));
-    }
-}
-
-/**
- * Renders admin notices for plugin actions.
- *
- * @return void
- */
-function revenue_leak_detector_render_action_notices()
-{
-    if (isset($_GET['settings-updated'])) {
-        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Settings saved.', 'revenue-leak-detector') . '</p></div>';
-    }
-}
-
-/**
  * Builds the payload for an add_to_cart event.
  *
  * @param int $product_id Product ID.
@@ -1381,8 +1189,6 @@ function revenue_leak_detector_build_add_to_cart_payload($product_id, $quantity)
     $payload = array(
         'product_id'   => $product_id,
         'quantity'     => $quantity,
-        'user_id'      => get_current_user_id(),
-        'session_id'   => function_exists('WC') && WC()->session ? WC()->session->get_customer_id() : '',
         'occurred_at'  => current_time('mysql', true),
         'category_ids' => isset($item_payload['category_ids']) ? $item_payload['category_ids'] : array(),
         'category_names' => isset($item_payload['category_names']) ? $item_payload['category_names'] : array(),
@@ -1412,13 +1218,10 @@ function revenue_leak_detector_build_add_to_cart_payload($product_id, $quantity)
 function revenue_leak_detector_build_begin_checkout_payload()
 {
     $payload = array(
-        'user_id'     => get_current_user_id(),
-        'session_id'  => function_exists('WC') && WC()->session ? WC()->session->get_customer_id() : '',
         'occurred_at' => current_time('mysql', true),
         'cart_total'  => function_exists('WC') && WC()->cart ? (float) WC()->cart->get_total('edit') : 0,
         'item_count'  => function_exists('WC') && WC()->cart ? (int) WC()->cart->get_cart_contents_count() : 0,
         'currency'    => function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : get_option('woocommerce_currency', ''),
-        'cart_hash'   => revenue_leak_detector_get_cart_fingerprint(),
         'items'       => revenue_leak_detector_build_cart_items_payload(),
     );
 
@@ -1433,12 +1236,9 @@ function revenue_leak_detector_build_begin_checkout_payload()
 function revenue_leak_detector_build_cart_context_payload()
 {
     return revenue_leak_detector_add_request_context_to_payload(array(
-        'user_id'        => get_current_user_id(),
-        'session_id'     => function_exists('WC') && WC()->session ? WC()->session->get_customer_id() : '',
         'occurred_at'    => current_time('mysql', true),
         'cart_total'     => function_exists('WC') && WC()->cart ? (float) WC()->cart->get_total('edit') : 0,
         'item_count'     => function_exists('WC') && WC()->cart ? (int) WC()->cart->get_cart_contents_count() : 0,
-        'cart_hash'      => revenue_leak_detector_get_cart_fingerprint(),
         'currency'       => function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : get_option('woocommerce_currency', ''),
     ));
 }
@@ -1491,8 +1291,6 @@ function revenue_leak_detector_build_remove_from_cart_payload($product_id, $quan
 function revenue_leak_detector_build_add_shipping_info_payload($order)
 {
     return revenue_leak_detector_add_request_context_to_payload(array(
-        'order_id'         => (int) $order->get_id(),
-        'user_id'          => (int) $order->get_user_id(),
         'occurred_at'      => current_time('mysql', true),
         'shipping_total'   => (float) $order->get_shipping_total(),
         'shipping_method'  => $order->get_shipping_method(),
@@ -1514,8 +1312,6 @@ function revenue_leak_detector_build_add_shipping_info_payload($order)
 function revenue_leak_detector_build_add_payment_info_payload($order)
 {
     return revenue_leak_detector_add_request_context_to_payload(array(
-        'order_id'        => (int) $order->get_id(),
-        'user_id'         => (int) $order->get_user_id(),
         'occurred_at'     => current_time('mysql', true),
         'payment_method'  => $order->get_payment_method(),
         'payment_method_title' => $order->get_payment_method_title(),
@@ -1537,7 +1333,6 @@ function revenue_leak_detector_build_add_payment_info_payload($order)
 function revenue_leak_detector_build_order_lifecycle_payload($order_id, $event_type)
 {
     $payload = array(
-        'order_id'    => absint($order_id),
         'event_type'  => sanitize_text_field($event_type),
         'occurred_at' => current_time('mysql', true),
     );
@@ -1555,7 +1350,6 @@ function revenue_leak_detector_build_order_lifecycle_payload($order_id, $event_t
     return revenue_leak_detector_add_request_context_to_payload(array_merge(
         $payload,
         array(
-            'user_id'              => (int) $order->get_user_id(),
             'status'               => $order->get_status(),
             'currency'             => $order->get_currency(),
             'total'                => (float) $order->get_total(),
@@ -1579,7 +1373,6 @@ function revenue_leak_detector_build_order_lifecycle_payload($order_id, $event_t
 function revenue_leak_detector_build_refund_payload($order_id, $refund_id)
 {
     $payload = revenue_leak_detector_build_order_lifecycle_payload($order_id, 'refund');
-    $payload['refund_id'] = absint($refund_id);
 
     if (! function_exists('wc_get_order')) {
         return revenue_leak_detector_add_request_context_to_payload($payload);
@@ -1608,7 +1401,6 @@ function revenue_leak_detector_build_payment_success_payload($order_id)
 {
     $order_id = absint($order_id);
     $payload = array(
-        'order_id'    => $order_id,
         'occurred_at' => current_time('mysql', true),
     );
 
@@ -1622,7 +1414,6 @@ function revenue_leak_detector_build_payment_success_payload($order_id)
         return revenue_leak_detector_add_request_context_to_payload($payload);
     }
 
-    $payload['user_id'] = (int) $order->get_user_id();
     $payload['status'] = $order->get_status();
     $payload['currency'] = $order->get_currency();
     $payload['total'] = (float) $order->get_total();
@@ -1633,274 +1424,6 @@ function revenue_leak_detector_build_payment_success_payload($order_id)
     $payload['items'] = revenue_leak_detector_build_order_items_payload($order);
 
     return revenue_leak_detector_add_request_context_to_payload($payload);
-}
-
-/**
- * Builds a full API URL from a relative path.
- *
- * @param string $path Relative API path.
- *
- * @return string|WP_Error
- */
-function revenue_leak_detector_build_api_url($path)
-{
-    $base_url = revenue_leak_detector_get_api_base_url();
-
-    if ($base_url === '') {
-        return new WP_Error(
-            'revenue_leak_detector_missing_api_base_url',
-            __('API base URL is not configured.', 'revenue-leak-detector')
-        );
-    }
-
-    $path = ltrim($path, '/');
-
-    return trailingslashit($base_url) . $path;
-}
-
-/**
- * Returns the configured API base URL.
- *
- * Priority:
- * 1. REVENUE_LEAK_DETECTOR_API_BASE_URL constant
- * 2. WordPress option
- * 3. Empty string
- *
- * @return string
- */
-function revenue_leak_detector_get_api_base_url()
-{
-    if (defined('REVENUE_LEAK_DETECTOR_API_BASE_URL')) {
-        return untrailingslashit((string) REVENUE_LEAK_DETECTOR_API_BASE_URL);
-    }
-
-    $base_url = get_option('revenue_leak_detector_api_base_url', '');
-
-    if (! is_string($base_url) || $base_url === '') {
-        return '';
-    }
-
-    return untrailingslashit($base_url);
-}
-
-/**
- * Sends a POST request to the configured API.
- *
- * @param string $path Relative API path.
- * @param array  $data Request payload.
- * @param array  $args Optional wp_remote_post arguments.
- *
- * @return array|WP_Error
- */
-function revenue_leak_detector_api_post($path, array $data, array $args = array())
-{
-    $url = revenue_leak_detector_build_api_url($path);
-
-    if (is_wp_error($url)) {
-        return $url;
-    }
-
-    $request_args = wp_parse_args(
-        $args,
-        array(
-            'method'  => 'POST',
-            'timeout' => 15,
-            'headers' => array(
-                'Content-Type' => 'application/json; charset=utf-8',
-            ),
-            'body'    => wp_json_encode($data),
-        )
-    );
-
-    if (! is_string($request_args['body']) || $request_args['body'] === '') {
-        return new WP_Error(
-            'revenue_leak_detector_invalid_request_body',
-            __('Request body could not be encoded.', 'revenue-leak-detector')
-        );
-    }
-
-    return wp_remote_post(esc_url_raw($url), $request_args);
-}
-
-/**
- * Sends a GET request to the configured API.
- *
- * @param string $path Relative API path.
- * @param array  $args Optional wp_remote_get arguments.
- *
- * @return array|WP_Error
- */
-function revenue_leak_detector_api_get($path, array $args = array())
-{
-    $url = revenue_leak_detector_build_api_url($path);
-
-    if (is_wp_error($url)) {
-        return $url;
-    }
-
-    $request_args = wp_parse_args(
-        $args,
-        array(
-            'method'  => 'GET',
-            'timeout' => 15,
-            'headers' => array(
-                'Accept' => 'application/json',
-            ),
-        )
-    );
-
-    return wp_remote_get(esc_url_raw($url), $request_args);
-}
-
-/**
- * Decodes a JSON API response.
- *
- * @param array|WP_Error $response HTTP response.
- *
- * @return array|WP_Error
- */
-function revenue_leak_detector_decode_api_response($response)
-{
-    if (is_wp_error($response)) {
-        return $response;
-    }
-
-    $status_code = (int) wp_remote_retrieve_response_code($response);
-    $body = wp_remote_retrieve_body($response);
-    $decoded = json_decode($body, true);
-
-    if ($status_code < 200 || $status_code >= 300) {
-        return new WP_Error(
-            'revenue_leak_detector_api_request_failed',
-            __('API request failed.', 'revenue-leak-detector'),
-            array(
-                'status_code' => $status_code,
-                'body'        => $body,
-            )
-        );
-    }
-
-    if (! is_array($decoded)) {
-        return new WP_Error(
-            'revenue_leak_detector_invalid_api_response',
-            __('API response is not valid JSON.', 'revenue-leak-detector')
-        );
-    }
-
-    return $decoded;
-}
-
-/**
- * Sends pending queue events to the API in a single batch.
- *
- * @param int $limit Maximum number of events.
- *
- * @return array|WP_Error
- */
-function revenue_leak_detector_send_pending_events_batch($limit = 20)
-{
-    $reservation = revenue_leak_detector_reserve_pending_queue_events($limit);
-    $reservation_status = $reservation['status'];
-    $events = $reservation['events'];
-
-    if ($events === array()) {
-        return array(
-            'sent_count' => 0,
-            'event_ids'  => array(),
-        );
-    }
-
-    $event_ids = array();
-    $payload_events = array();
-
-    foreach ($events as $event) {
-        $payload = json_decode($event->payload_json, true);
-
-        if (! is_array($payload)) {
-            $payload = array(
-                'raw_payload' => $event->payload_json,
-            );
-        }
-
-        $event_ids[] = (int) $event->id;
-        $payload_events[] = array(
-            'id'         => (int) $event->id,
-            'event_type' => $event->event_type,
-            'payload'    => $payload,
-            'created_at' => $event->created_at,
-        );
-    }
-
-    $response = revenue_leak_detector_api_post(
-        'events/batch',
-        array(
-            'events' => $payload_events,
-        )
-    );
-
-    if (is_wp_error($response)) {
-        revenue_leak_detector_release_queue_events($event_ids, $reservation_status);
-        return $response;
-    }
-
-    $response_code = (int) wp_remote_retrieve_response_code($response);
-
-    if ($response_code < 200 || $response_code >= 300) {
-        revenue_leak_detector_release_queue_events($event_ids, $reservation_status);
-        return new WP_Error(
-            'revenue_leak_detector_batch_request_failed',
-            __('Batch request failed.', 'revenue-leak-detector'),
-            array(
-                'status_code' => $response_code,
-                'response'    => $response,
-            )
-        );
-    }
-
-    revenue_leak_detector_mark_queue_events_sent($event_ids, $reservation_status);
-
-    return array(
-        'sent_count' => count($event_ids),
-        'event_ids'  => $event_ids,
-    );
-}
-
-/**
- * Schedules the recurring WP-Cron event if it is not already registered.
- *
- * @return void
- */
-function revenue_leak_detector_schedule_cron()
-{
-    if (wp_next_scheduled(REVENUE_LEAK_DETECTOR_CRON_HOOK)) {
-        return;
-    }
-
-    wp_schedule_event(time() + MINUTE_IN_SECONDS, 'hourly', REVENUE_LEAK_DETECTOR_CRON_HOOK);
-}
-
-/**
- * Clears the recurring WP-Cron event.
- *
- * @return void
- */
-function revenue_leak_detector_clear_cron()
-{
-    $timestamp = wp_next_scheduled(REVENUE_LEAK_DETECTOR_CRON_HOOK);
-
-    if ($timestamp) {
-        wp_unschedule_event($timestamp, REVENUE_LEAK_DETECTOR_CRON_HOOK);
-    }
-}
-
-/**
- * Runs the batch sender on the WP-Cron schedule.
- *
- * @return void
- */
-function revenue_leak_detector_run_scheduled_batch_send()
-{
-    revenue_leak_detector_send_pending_events_batch();
 }
 
 /**
@@ -2429,7 +1952,6 @@ function revenue_leak_detector_render_local_dashboard_styles()
     .rld-chart-line-cart{stroke:#0ea5e9; fill:none; stroke-width:3;}
     .rld-chart-line-purchase{stroke:#22c55e; fill:none; stroke-width:3;}
     .rld-chart-area{fill:rgba(14,165,233,.08);}
-    .rld-settings-note{margin-top:10px; color:#64748b;}
     @media (hover: hover){
         .rld-card:hover,.rld-card:focus-within{transform:translateY(-2px); box-shadow:0 14px 32px rgba(15,23,42,.08); border-color:#cbd5e1;}
         .rld-next-action:hover,.rld-next-action:focus-within{transform:translateY(-2px); box-shadow:0 16px 34px rgba(15,23,42,.08); border-color:#93c5fd;}
@@ -2452,11 +1974,7 @@ function revenue_leak_detector_get_admin_tab()
 {
     $tab = isset($_GET['tab']) ? sanitize_key(wp_unslash($_GET['tab'])) : 'dashboard';
 
-    if (! in_array($tab, array('dashboard', 'settings'), true)) {
-        return 'dashboard';
-    }
-
-    if ($tab === 'settings' && ! revenue_leak_detector_should_show_developer_settings()) {
+    if ($tab !== 'dashboard') {
         return 'dashboard';
     }
 
@@ -2481,16 +1999,6 @@ function revenue_leak_detector_render_admin_tabs($active_tab)
     );
     echo '<div class="rld-tabs">';
     echo '<a class="rld-tab ' . esc_attr($active_tab === 'dashboard' ? 'rld-tab-active' : '') . '" href="' . esc_url($dashboard_url) . '">' . esc_html__('Dashboard', 'revenue-leak-detector') . '</a>';
-    if (revenue_leak_detector_should_show_developer_settings()) {
-        $settings_url = add_query_arg(
-            array(
-                'page' => 'revenue-leak-detector',
-                'tab'  => 'settings',
-            ),
-            admin_url('admin.php')
-        );
-        echo '<a class="rld-tab ' . esc_attr($active_tab === 'settings' ? 'rld-tab-active' : '') . '" href="' . esc_url($settings_url) . '">' . esc_html__('Settings', 'revenue-leak-detector') . '</a>';
-    }
     echo '</div>';
 }
 
@@ -3023,36 +2531,6 @@ function revenue_leak_detector_render_local_trend_section(array $trend)
 }
 
 /**
- * Handles admin API base URL updates.
- *
- * @return void
- */
-function revenue_leak_detector_handle_save_settings()
-{
-    if (! current_user_can('manage_options')) {
-        wp_die(esc_html__('You are not allowed to perform this action.', 'revenue-leak-detector'));
-    }
-
-    check_admin_referer('revenue_leak_detector_save_settings');
-
-    if (revenue_leak_detector_should_show_developer_settings() && isset($_POST['api_base_url'])) {
-        $api_base_url = sanitize_text_field(wp_unslash($_POST['api_base_url']));
-        update_option('revenue_leak_detector_api_base_url', untrailingslashit($api_base_url));
-    }
-
-    wp_safe_redirect(
-        add_query_arg(
-            array(
-                'page' => 'revenue-leak-detector',
-                'settings-updated' => '1',
-            ),
-            admin_url('admin.php')
-        )
-    );
-    exit;
-}
-
-/**
  * Renders the plugin admin page.
  *
  * @return void
@@ -3070,28 +2548,8 @@ function revenue_leak_detector_render_admin_page()
     echo '<div class="wrap">';
     echo '<h1>' . esc_html__('Revenue Leak Detector', 'revenue-leak-detector') . '</h1>';
     echo '<p>' . esc_html__('Track funnel leakage, spot the biggest conversion problem, and see what to fix next.', 'revenue-leak-detector') . '</p>';
-    revenue_leak_detector_render_action_notices();
     revenue_leak_detector_render_local_dashboard_styles();
     revenue_leak_detector_render_admin_tabs($active_tab);
-
-    if ($active_tab === 'settings') {
-        echo '<div class="postbox" style="padding:16px; margin-top:16px;">';
-        echo '<h2 style="margin-top:0;">' . esc_html__('Plugin Configuration', 'revenue-leak-detector') . '</h2>';
-        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
-        wp_nonce_field('revenue_leak_detector_save_settings');
-        echo '<input type="hidden" name="action" value="revenue_leak_detector_save_settings" />';
-        echo '<table class="form-table" role="presentation"><tbody>';
-        if (revenue_leak_detector_should_show_developer_settings()) {
-            echo '<tr>';
-            echo '<th scope="row"><label for="revenue-leak-detector-api-base-url">' . esc_html__('API Base URL', 'revenue-leak-detector') . '</label></th>';
-            echo '<td><input type="url" class="regular-text" id="revenue-leak-detector-api-base-url" name="api_base_url" value="' . esc_attr(revenue_leak_detector_get_api_base_url()) . '" placeholder="https://api.example.com" /><p class="description">' . esc_html__('Developer-only setting for custom backend integrations.', 'revenue-leak-detector') . '</p></td>';
-            echo '</tr>';
-        }
-        echo '</tbody></table>';
-        submit_button(__('Save Settings', 'revenue-leak-detector'));
-        echo '</form>';
-        echo '</div>';
-    }
 
     if ($active_tab === 'dashboard') {
         echo '<div class="rld-shell">';
@@ -3119,27 +2577,11 @@ function revenue_leak_detector_render_admin_page()
 function revenue_leak_detector_activate()
 {
     revenue_leak_detector_create_queue_table();
-    revenue_leak_detector_schedule_cron();
-}
-
-/**
- * Plugin deactivation callback.
- *
- *
- * @return void
- */
-function revenue_leak_detector_deactivate()
-{
-    revenue_leak_detector_clear_cron();
 }
 
 register_activation_hook(__FILE__, 'revenue_leak_detector_activate');
-register_deactivation_hook(__FILE__, 'revenue_leak_detector_deactivate');
 add_action('init', 'revenue_leak_detector_load_textdomain');
-add_action('init', 'revenue_leak_detector_schedule_cron');
 add_action('admin_menu', 'revenue_leak_detector_register_admin_menu');
-add_action('admin_post_revenue_leak_detector_save_settings', 'revenue_leak_detector_handle_save_settings');
-add_action(REVENUE_LEAK_DETECTOR_CRON_HOOK, 'revenue_leak_detector_run_scheduled_batch_send');
 add_action('woocommerce_add_to_cart', 'revenue_leak_detector_capture_add_to_cart', 10, 3);
 add_action('template_redirect', 'revenue_leak_detector_capture_view_cart');
 add_action('woocommerce_cart_item_removed', 'revenue_leak_detector_capture_remove_from_cart', 10, 2);

@@ -1,9 +1,9 @@
 === Revenue Leak Detector ===
-Contributors: revenueleakdetector
+Contributors: growthhooks
 Donate link: https://ugur.me
 Tags: woocommerce, checkout, cart abandonment, conversion optimization, analytics
 Requires at least: 6.4
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
@@ -16,6 +16,8 @@ Homepage: https://ugur.me
 == Description ==
 
 Revenue Leak Detector shows where revenue is slipping away between add to cart, checkout, and purchase.
+
+The plugin stores funnel events locally in your WordPress database and does not send store, customer, order, or analytics data to an external service.
 
 Instead of raw analytics, it gives you a focused conversion view:
 
@@ -54,7 +56,11 @@ Yes. Revenue Leak Detector is built for WooCommerce stores.
 
 = Does it send data anywhere? =
 
-The free dashboard works from locally captured event data. The plugin also includes background delivery infrastructure for connected environments.
+No. Revenue Leak Detector stores captured WooCommerce funnel events in a local WordPress database table and builds the dashboard from that local data.
+
+= What data does it store? =
+
+The plugin stores WooCommerce funnel event details such as event type, event time, product/cart/order totals, item counts, product details, payment or shipping method labels, and order status where relevant. It does not store billing address, shipping address, email address, phone number, IP address, user agent, referrer URL, full request URL, WordPress user ID, WooCommerce session ID, order ID, refund ID, or cart hash in event payloads.
 
 = Can I filter by date? =
 
@@ -63,8 +69,6 @@ Yes. You can use preset ranges or choose a custom start and end date.
 == Screenshots ==
 
 1. Conversion dashboard with leak score, top issue, and next action
-2. Funnel analysis showing cart-to-checkout and checkout-to-purchase loss
-3. Trend view for recent WooCommerce conversion performance
 
 == Changelog ==
 
@@ -74,3 +78,4 @@ Yes. You can use preset ranges or choose a custom start and end date.
 * Added WooCommerce funnel tracking and conversion dashboard
 * Added Revenue Leak Score, issue prioritization, and next action guidance
 * Added date filtering and 7-day trend visibility
+* Added local-only data handling for the WordPress.org release
