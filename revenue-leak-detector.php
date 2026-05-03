@@ -372,6 +372,65 @@ function revenue_leak_detector_classify_funnel_request()
 }
 
 /**
+ * Classifies order lifecycle events without rejecting server-side gateway hooks.
+ *
+ * @return array{status: string, reasons: array<int, string>}
+ */
+function revenue_leak_detector_classify_order_lifecycle_request()
+{
+    $context = revenue_leak_detector_get_request_context();
+    $reasons = array();
+
+    if (! empty($context['bot_reasons']) && in_array('known_bot_user_agent', (array) $context['bot_reasons'], true)) {
+        $reasons[] = 'known_bot_user_agent';
+    }
+
+    return array(
+        'status'  => $reasons === array() ? 'pending' : 'ignored',
+        'reasons' => array_values(array_unique($reasons)),
+    );
+}
+
+/**
+ * Adds ignored reasons to a classified payload when needed.
+ *
+ * @param array<string, mixed>                $payload        Event payload.
+ * @param array{status: string, reasons: array<int, string>} $classification Event classification.
+ *
+ * @return array<string, mixed>
+ */
+function revenue_leak_detector_apply_event_classification_to_payload(array $payload, array $classification)
+{
+    if (! empty($classification['reasons'])) {
+        $payload['ignored_reasons'] = $classification['reasons'];
+    }
+
+    return $payload;
+}
+
+/**
+ * Inserts an event with request classification applied.
+ *
+ * @param string               $event_type Event type.
+ * @param array<string, mixed> $payload    Event payload.
+ * @param array{status: string, reasons: array<int, string>}|null $classification Optional classification.
+ *
+ * @return int|false
+ */
+function revenue_leak_detector_insert_classified_queue_event($event_type, array $payload, $classification = null)
+{
+    if ($classification === null) {
+        $classification = revenue_leak_detector_classify_funnel_request();
+    }
+
+    return revenue_leak_detector_insert_queue_event(
+        $event_type,
+        revenue_leak_detector_apply_event_classification_to_payload($payload, $classification),
+        isset($classification['status']) ? (string) $classification['status'] : 'pending'
+    );
+}
+
+/**
  * Returns pending queue events.
  *
  * @param int $limit Maximum number of events.
@@ -2020,12 +2079,25 @@ function revenue_leak_detector_capture_payment_success($order_id)
         return;
     }
 
-    revenue_leak_detector_insert_queue_event(
+    $classification = revenue_leak_detector_classify_order_lifecycle_request();
+
+    if ($classification['status'] === 'ignored' && $order->get_meta('_revenue_leak_detector_payment_success_ignored_tracked', true)) {
+        return;
+    }
+
+    revenue_leak_detector_insert_classified_queue_event(
         'payment_success',
-        revenue_leak_detector_build_payment_success_payload($order_id)
+        revenue_leak_detector_build_payment_success_payload($order_id),
+        $classification
     );
 
-    $order->update_meta_data('_revenue_leak_detector_payment_success_tracked', 1);
+    if ($classification['status'] === 'pending') {
+        $order->update_meta_data('_revenue_leak_detector_payment_success_tracked', 1);
+        $order->save();
+        return;
+    }
+
+    $order->update_meta_data('_revenue_leak_detector_payment_success_ignored_tracked', 1);
     $order->save();
 }
 
