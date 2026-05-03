@@ -69,6 +69,8 @@ Yes. You can use preset ranges or choose a custom start and end date.
 == Screenshots ==
 
 1. Conversion dashboard with leak score, top issue, and next action
+2. Core funnel view showing cart-to-checkout and checkout-to-purchase drop-off
+3. Seven-day trend chart comparing add-to-cart intent with purchases
 
 == Changelog ==
 
