@@ -1,12 +1,12 @@
-# Revenue Leak Detector
+# GrowthHooks Revenue Leak Detector
 
 English documentation: [README.en.md](./README.en.md)
 
 WooCommerce mağazanızda kullanıcıların nerede kaybolduğunu görün, checkout kaçaklarını tespit edin ve dönüşümü artırmak için atmanız gereken bir sonraki adımı öğrenin.
 
-![Revenue Leak Detector Ekranı](./screenshots/09b6c84e-dc0b-406b-8952-f987b537791a.png)
+![GrowthHooks Revenue Leak Detector Ekranı](./screenshots/09b6c84e-dc0b-406b-8952-f987b537791a.png)
 
-Revenue Leak Detector, kullanıcıların sepete eklemeden checkout’a ve satın almaya giden yolculukta hangi noktada ayrıldığını gösteren hafif bir WooCommerce eklentisidir.
+GrowthHooks Revenue Leak Detector, kullanıcıların sepete eklemeden checkout’a ve satın almaya giden yolculukta hangi noktada ayrıldığını gösteren hafif bir WooCommerce eklentisidir.
 
 Karmaşık raporlarla uğraşmak yerine doğrudan şunları gösterir:
 
@@ -35,7 +35,7 @@ Karmaşık raporlarla uğraşmak yerine doğrudan şunları gösterir:
 1. Eklentiyi `/wp-content/plugins/revenue-leak-detector` dizinine yükleyin
 2. WordPress eklenti ekranından etkinleştirin
 3. WooCommerce’in aktif olduğundan emin olun
-4. Yönetim menüsünden `Revenue Leak Detector` ekranını açın
+4. Yönetim menüsünden `GrowthHooks Revenue Leak Detector` ekranını açın
 
 ## Dahil Olan Diller
 
@@ -53,4 +53,3 @@ WordPress.org sürümünde ana readme dosyası olarak [`readme.txt`](./readme.tx
 
 Ugur Can Gokkaya  
 [https://ugur.me](https://ugur.me)
-

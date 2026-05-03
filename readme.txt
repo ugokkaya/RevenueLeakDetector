@@ -1,4 +1,4 @@
-=== Revenue Leak Detector ===
+=== GrowthHooks Revenue Leak Detector ===
 Contributors: growthhooks
 Donate link: https://ugur.me
 Tags: woocommerce, checkout, cart abandonment, conversion optimization, analytics
@@ -15,7 +15,7 @@ Homepage: https://ugur.me
 
 == Description ==
 
-Revenue Leak Detector shows where revenue is slipping away between add to cart, checkout, and purchase.
+GrowthHooks Revenue Leak Detector shows where revenue is slipping away between add to cart, checkout, and purchase.
 
 The plugin stores funnel events locally in your WordPress database and does not send store, customer, order, or analytics data to an external service.
 
@@ -46,17 +46,17 @@ This version is intentionally focused. It gives you the essential funnel diagnos
 1. Upload the plugin files to the `/wp-content/plugins/revenue-leak-detector` directory, or install the plugin through the WordPress plugins screen.
 2. Activate the plugin through the `Plugins` screen in WordPress.
 3. Make sure WooCommerce is active.
-4. Open `Revenue Leak Detector` from the WordPress admin menu.
+4. Open `GrowthHooks Revenue Leak Detector` from the WordPress admin menu.
 
 == Frequently Asked Questions ==
 
 = Does this require WooCommerce? =
 
-Yes. Revenue Leak Detector is built for WooCommerce stores.
+Yes. GrowthHooks Revenue Leak Detector is built for WooCommerce stores.
 
 = Does it send data anywhere? =
 
-No. Revenue Leak Detector stores captured WooCommerce funnel events in a local WordPress database table and builds the dashboard from that local data.
+No. GrowthHooks Revenue Leak Detector stores captured WooCommerce funnel events in a local WordPress database table and builds the dashboard from that local data.
 
 = What data does it store? =
 

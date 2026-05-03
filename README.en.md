@@ -1,12 +1,12 @@
-# Revenue Leak Detector
+# GrowthHooks Revenue Leak Detector
 
 Turkish documentation: [README.md](./README.md)
 
 Find checkout leaks, cart abandonment points, and the next action to recover WooCommerce conversions.
 
-![Revenue Leak Detector Dashboard](./screenshots/09b6c84e-dc0b-406b-8952-f987b537791a.png)
+![GrowthHooks Revenue Leak Detector Dashboard](./screenshots/09b6c84e-dc0b-406b-8952-f987b537791a.png)
 
-Revenue Leak Detector is a lightweight WooCommerce plugin focused on one job: showing where shoppers drop out between add to cart, checkout, and purchase.
+GrowthHooks Revenue Leak Detector is a lightweight WooCommerce plugin focused on one job: showing where shoppers drop out between add to cart, checkout, and purchase.
 
 Instead of sending you into complex reports, it highlights:
 
@@ -35,7 +35,7 @@ Instead of sending you into complex reports, it highlights:
 1. Upload the plugin to `/wp-content/plugins/revenue-leak-detector`
 2. Activate it from the WordPress Plugins screen
 3. Make sure WooCommerce is active
-4. Open `Revenue Leak Detector` from the WordPress admin menu
+4. Open `GrowthHooks Revenue Leak Detector` from the WordPress admin menu
 
 ## Included Languages
 

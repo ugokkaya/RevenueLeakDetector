@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Revenue Leak Detector
+ * Plugin Name: GrowthHooks Revenue Leak Detector
  * Plugin URI: https://ugur.me
  * Description: Find checkout leaks, cart abandonment points, and the next action to recover WooCommerce conversions.
  * Version: 1.0.0
@@ -1712,8 +1712,8 @@ function revenue_leak_detector_capture_refund($order_id, $refund_id)
 function revenue_leak_detector_register_admin_menu()
 {
     add_menu_page(
-        __('Revenue Leak Detector', 'revenue-leak-detector'),
-        __('Revenue Leak Detector', 'revenue-leak-detector'),
+        __('GrowthHooks Revenue Leak Detector', 'revenue-leak-detector'),
+        __('GrowthHooks Revenue Leak Detector', 'revenue-leak-detector'),
         'manage_options',
         'revenue-leak-detector',
         'revenue_leak_detector_render_admin_page',
@@ -2546,7 +2546,7 @@ function revenue_leak_detector_render_admin_page()
     $local_dashboard_data = revenue_leak_detector_get_local_dashboard_data($filters);
 
     echo '<div class="wrap">';
-    echo '<h1>' . esc_html__('Revenue Leak Detector', 'revenue-leak-detector') . '</h1>';
+    echo '<h1>' . esc_html__('GrowthHooks Revenue Leak Detector', 'revenue-leak-detector') . '</h1>';
     echo '<p>' . esc_html__('Track funnel leakage, spot the biggest conversion problem, and see what to fix next.', 'revenue-leak-detector') . '</p>';
     revenue_leak_detector_render_local_dashboard_styles();
     revenue_leak_detector_render_admin_tabs($active_tab);
